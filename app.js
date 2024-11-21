@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 // Database Connection
-const db = new sqlite3.Database('./coursemanagement.db', (err) => {
+const db = new sqlite3.Database('./traininginrwanda.db', (err) => {
   if (err) {
     console.error('Database connection error:', err.message);
   }
@@ -20,7 +20,7 @@ db.serialize(() => {
     username TEXT UNIQUE,
     email TEXT UNIQUE,
     password TEXT,
-    role TEXT DEFAULT 'student'
+    role TEXT DEFAULT 'ADMIN'
   )`);
 
   // Categories Table
@@ -52,6 +52,39 @@ db.serialize(() => {
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(course_id) REFERENCES courses(id)
   )`);
+
+    // Trainings Table
+    db.run(`CREATE TABLE IF NOT EXISTS trainings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      description TEXT,
+      duration INTEGER,
+      instructor TEXT,
+      start_date DATE,
+      end_date DATE,
+      fee DECIMAL(10,2),
+      level TEXT,
+      is_certified BOOLEAN,
+      what_you_will_learn TEXT,
+      address TEXT
+    )`);
+
+    //categories table
+    db.run(`CREATE TABLE IF NOT EXISTS categories (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE,
+      description TEXT
+    )`);
+  
+    // Training Schedules Table
+    db.run(`CREATE TABLE IF NOT EXISTS training_schedules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      training_id INTEGER,
+      start_date DATE,
+      end_date DATE,
+      capacity INTEGER,
+      FOREIGN KEY(training_id) REFERENCES trainings(id)
+    )`);
 });
 
 const app = express();
@@ -63,14 +96,14 @@ app.use(passport.initialize());
 
 // Routes (to be imported)
 const authRoutes = require('./routes/authRoutes');
-const courseRoutes = require('./routes/courseRoutes');
+const trainingRoutes = require('./routes/trainingRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
-const enrollmentRoutes = require('./routes/enrollmentRoutes');
+const trainingScheduleRoutes = require('./routes/trainingScheduleRoutes');
 
 app.use('/api/auth', authRoutes);
-app.use('/api/courses', courseRoutes);
-// app.use('/api/categories', categoryRoutes);
-// app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/training', trainingRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/training-schedules', trainingScheduleRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
