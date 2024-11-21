@@ -52,6 +52,18 @@ const TrainingScheduleController = {
       }
       res.status(200).json({ message: 'Training schedule deleted successfully' });
     });
+  },
+  getSchedulesByTraining: (req, res) => {
+    const { trainingId } = req.params;
+    TrainingSchedule.getByTraining(trainingId, (err, schedules) => {
+      if (err) {
+        return res.status(500).json({ error: 'Error fetching training schedules' });
+      }
+      if (!schedules || schedules.length === 0) {
+        return res.status(404).json({ error: 'No schedules found for this training' });
+      }
+      res.status(200).json(schedules);
+    });
   }
 };
 

@@ -30,13 +30,26 @@ const Training = {
   getAll: (callback) => {
     db.all('SELECT * FROM trainings', (err, rows) => {
       if (err) return callback(err);
-
-      const parsedRows = rows.map(row => ({
-        ...row,
-        what_you_will_learn: row.what_you_will_learn
-          ? JSON.parse(row.what_you_will_learn) // Parse if not null/undefined
-          : [] // Default to an empty array
-      }));
+  
+      const parsedRows = rows.map(row => {
+        // Create a copy of the row to avoid modifying the original
+        const parsedRow = {...row};
+  
+        try {
+          // Only attempt to parse if what_you_will_learn is a string and not empty
+          if (parsedRow.what_you_will_learn && typeof parsedRow.what_you_will_learn === 'string') {
+            parsedRow.what_you_will_learn = JSON.parse(parsedRow.what_you_will_learn);
+          } else {
+            parsedRow.what_you_will_learn = [];
+          }
+        } catch (parseError) {
+          console.error('Error parsing what_you_will_learn:', parseError);
+          parsedRow.what_you_will_learn = [];
+        }
+  
+        return parsedRow;
+      });
+  
       callback(null, parsedRows);
     });
   },
@@ -44,12 +57,22 @@ const Training = {
   getById: (id, callback) => {
     db.get('SELECT * FROM trainings WHERE id = ?', [id], (err, row) => {
       if (err) return callback(err);
-
+      
       if (row) {
-        row.what_you_will_learn = row.what_you_will_learn
-          ? JSON.parse(row.what_you_will_learn) // Parse if not null/undefined
-          : []; // Default to an empty array
+        try {
+          // Only parse what_you_will_learn if it's a string
+          row.what_you_will_learn = row.what_you_will_learn 
+            ? (typeof row.what_you_will_learn === 'string' 
+                ? JSON.parse(row.what_you_will_learn) 
+                : row.what_you_will_learn)
+            : [];
+        } catch (parseError) {
+          // If parsing fails, default to an empty array
+          console.error('Error parsing what_you_will_learn:', parseError);
+          row.what_you_will_learn = [];
+        }
       }
+      
       callback(null, row);
     });
   },
@@ -71,7 +94,7 @@ const Training = {
         updatedTraining.fee,
         updatedTraining.level,
         updatedTraining.is_certified,
-        updatedTraining.what_you_will_learn,
+        JSON.stringify(updatedTraining.what_you_will_learn), // Stringify the array
         updatedTraining.address,
         id
       ],
@@ -156,6 +179,14 @@ const TrainingSchedule = {
 
   delete: (id, callback) => {
     db.run('DELETE FROM training_schedules WHERE id = ?', [id], callback);
+  },
+  getByTraining: (trainingId, callback) => {
+    db.all('SELECT * FROM training_schedules WHERE training_id = ?', [trainingId], (err, schedules) => {
+      if (err) {
+        return callback(err);
+      }
+      callback(null, schedules);
+    });
   }
 };
 

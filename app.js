@@ -42,15 +42,17 @@ db.serialize(() => {
     FOREIGN KEY(category_id) REFERENCES categories(id)
   )`);
 
-  // Enrollments Table
-  db.run(`CREATE TABLE IF NOT EXISTS enrollments (
+  // Enrollment Table
+  db.run(`CREATE TABLE IF NOT EXISTS enrollment (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
-    course_id INTEGER,
+    fullname TEXT,
+    email TEXT,
+    phone TEXT, 
+    address TEXT,
+    training_schedule_id INTEGER,
     enrollment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     status TEXT DEFAULT 'active',
-    FOREIGN KEY(user_id) REFERENCES users(id),
-    FOREIGN KEY(course_id) REFERENCES courses(id)
+    FOREIGN KEY(training_schedule_id) REFERENCES training_schedules(id)
   )`);
 
     // Trainings Table
@@ -99,11 +101,13 @@ const authRoutes = require('./routes/authRoutes');
 const trainingRoutes = require('./routes/trainingRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const trainingScheduleRoutes = require('./routes/trainingScheduleRoutes');
+const enrollmentRoutes = require('./routes/enrollmentRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/training-schedules', trainingScheduleRoutes);
+app.use('/api/enrollments', enrollmentRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
