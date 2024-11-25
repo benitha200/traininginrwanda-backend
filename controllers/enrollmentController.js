@@ -61,7 +61,7 @@ async function generateAcceptanceLetter(enrollment) {
         .text(enrollment.organization || '')
         .text(`Tel: ${enrollment.phone || 'N/A'}`)
         .text(`Email: ${enrollment.email}`)
-        .text(`Country: ${enrollment.country || 'N/A'}`)
+        .text(`Country: ${enrollment.country || 'Rwanda'}`)
         .moveDown(2);
 
       // Right side header information
@@ -127,9 +127,8 @@ async function generateAcceptanceLetter(enrollment) {
         .moveDown(2)
         .text('Yours sincerely,')
         .moveDown()
-        .text('Vianney Rugamba')
-        .text('Trainings Coordinator - KICDDA')
-        .text('T: +250 793 086 968')
+        .text('Training In Rwanda')
+        .text('T: +250 785 283 918')
         .text('E: info@traininginrwanda.com')
         .text('W: www.traininginrwanda.com')
         .moveDown(2);
