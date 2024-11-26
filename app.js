@@ -95,6 +95,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
+app.use(express.urlencoded({ extended: true })); // To parse URL-encoded requests
 
 // Routes (to be imported)
 const authRoutes = require('./routes/authRoutes');
