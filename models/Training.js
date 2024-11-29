@@ -1,15 +1,15 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-const db = new sqlite3.Database(path.resolve(__dirname, '../traininginrwanda.db'));
+const db = new sqlite3.Database(path.resolve(__dirname, '../traininginrwanda1.db'));
 
 const Training = {
   create: (training, callback) => {
     db.run(
       `INSERT INTO trainings (
         title, description, duration, instructor, start_date, end_date, 
-        fee, level, is_certified, what_you_will_learn, address
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        fee, level, is_certified, what_you_will_learn, address, category_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         training.title, 
         training.description,
@@ -21,22 +21,50 @@ const Training = {
         training.level,
         training.is_certified,
         JSON.stringify(training.what_you_will_learn),
-        training.address
+        training.address,
+        training.category_id // Add category_id
       ],
       callback
     );
   },
 
+  // getAll: (callback) => {
+  //   db.all('SELECT * FROM trainings', (err, rows) => {
+  //     if (err) return callback(err);
+  
+  //     const parsedRows = rows.map(row => {
+  //       // Create a copy of the row to avoid modifying the original
+  //       const parsedRow = {...row};
+  
+  //       try {
+  //         // Only attempt to parse if what_you_will_learn is a string and not empty
+  //         if (parsedRow.what_you_will_learn && typeof parsedRow.what_you_will_learn === 'string') {
+  //           parsedRow.what_you_will_learn = JSON.parse(parsedRow.what_you_will_learn);
+  //         } else {
+  //           parsedRow.what_you_will_learn = [];
+  //         }
+  //       } catch (parseError) {
+  //         console.error('Error parsing what_you_will_learn:', parseError);
+  //         parsedRow.what_you_will_learn = [];
+  //       }
+  
+  //       return parsedRow;
+  //     });
+  
+  //     callback(null, parsedRows);
+  //   });
+  // },
+
+
+  // For getAll and getById methods, modify to parse category_id
   getAll: (callback) => {
     db.all('SELECT * FROM trainings', (err, rows) => {
       if (err) return callback(err);
   
       const parsedRows = rows.map(row => {
-        // Create a copy of the row to avoid modifying the original
         const parsedRow = {...row};
   
         try {
-          // Only attempt to parse if what_you_will_learn is a string and not empty
           if (parsedRow.what_you_will_learn && typeof parsedRow.what_you_will_learn === 'string') {
             parsedRow.what_you_will_learn = JSON.parse(parsedRow.what_you_will_learn);
           } else {
@@ -82,7 +110,7 @@ const Training = {
       `UPDATE trainings
        SET title = ?, description = ?, duration = ?, instructor = ?, 
            start_date = ?, end_date = ?, fee = ?, level = ?, 
-           is_certified = ?, what_you_will_learn = ?, address = ?
+           is_certified = ?, what_you_will_learn = ?, address = ?, category_id = ?
        WHERE id = ?`,
       [
         updatedTraining.title,
@@ -94,8 +122,9 @@ const Training = {
         updatedTraining.fee,
         updatedTraining.level,
         updatedTraining.is_certified,
-        JSON.stringify(updatedTraining.what_you_will_learn), // Stringify the array
+        JSON.stringify(updatedTraining.what_you_will_learn),
         updatedTraining.address,
+        updatedTraining.category_id, // Add category_id
         id
       ],
       function (err) {
@@ -108,6 +137,28 @@ const Training = {
     );
   },
   
+  // Add a method to get trainings by category
+  getByCategory: (categoryId, callback) => {
+    db.all('SELECT * FROM trainings WHERE category_id = ?', [categoryId], (err, rows) => {
+      if (err) return callback(err);
+  
+      const parsedRows = rows.map(row => {
+        try {
+          row.what_you_will_learn = row.what_you_will_learn 
+            ? (typeof row.what_you_will_learn === 'string' 
+                ? JSON.parse(row.what_you_will_learn) 
+                : row.what_you_will_learn)
+            : [];
+        } catch (parseError) {
+          console.error('Error parsing what_you_will_learn:', parseError);
+          row.what_you_will_learn = [];
+        }
+        return row;
+      });
+  
+      callback(null, parsedRows);
+    });
+  },
   
 
   delete: (id, callback) => {

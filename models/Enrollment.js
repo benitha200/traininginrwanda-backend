@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./traininginrwanda.db');
+const db = new sqlite3.Database('./traininginrwanda1.db');
 
 class Enrollment {
   static createEnrollment(enrollmentData) {

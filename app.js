@@ -5,7 +5,7 @@ const cors = require('cors');
 const path = require('path');
 
 // Database Connection
-const db = new sqlite3.Database('./traininginrwanda.db', (err) => {
+const db = new sqlite3.Database('./traininginrwanda1.db', (err) => {
   if (err) {
     console.error('Database connection error:', err.message);
   }
@@ -55,31 +55,49 @@ db.serialize(() => {
     FOREIGN KEY(training_schedule_id) REFERENCES training_schedules(id)
   )`);
 
-    // Trainings Table
-    db.run(`CREATE TABLE IF NOT EXISTS trainings (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT,
-      description TEXT,
-      duration INTEGER,
-      instructor TEXT,
-      start_date DATE,
-      end_date DATE,
-      fee DECIMAL(10,2),
-      level TEXT,
-      is_certified BOOLEAN,
-      what_you_will_learn TEXT,
-      address TEXT
-    )`);
+  // Trainings Table
+  // db.run(`CREATE TABLE IF NOT EXISTS trainings (
+  //   id INTEGER PRIMARY KEY AUTOINCREMENT,
+  //   title TEXT,
+  //   description TEXT,
+  //   duration INTEGER,
+  //   instructor TEXT,
+  //   start_date DATE,
+  //   end_date DATE,
+  //   fee DECIMAL(10,2),
+  //   level TEXT,
+  //   is_certified BOOLEAN,
+  //   what_you_will_learn TEXT,
+  //   address TEXT
+  // )`);
 
-    //categories table
-    db.run(`CREATE TABLE IF NOT EXISTS categories (
+  // Add category_id to the trainings table creation
+  db.run(`CREATE TABLE IF NOT EXISTS trainings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    description TEXT,
+    duration INTEGER,
+    instructor TEXT,
+    start_date DATE,
+    end_date DATE,
+    fee DECIMAL(10,2),
+    level TEXT,
+    is_certified BOOLEAN,
+    what_you_will_learn TEXT,
+    address TEXT,
+    category_id INTEGER,
+    FOREIGN KEY(category_id) REFERENCES categories(id)
+  )`);
+
+  //categories table
+  db.run(`CREATE TABLE IF NOT EXISTS categories (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT UNIQUE,
       description TEXT
     )`);
-  
-    // Training Schedules Table
-    db.run(`CREATE TABLE IF NOT EXISTS training_schedules (
+
+  // Training Schedules Table
+  db.run(`CREATE TABLE IF NOT EXISTS training_schedules (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       training_id INTEGER,
       start_date DATE,

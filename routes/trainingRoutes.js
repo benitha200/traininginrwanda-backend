@@ -9,5 +9,6 @@ router.get('/', TrainingController.getAllTrainings);
 router.get('/:id', TrainingController.getTrainingById);
 router.put('/:id', TrainingController.updateTraining);
 router.delete('/:id', TrainingController.deleteTraining);
+router.get('/category/:categoryId', TrainingController.getTrainingsByCategory);
 
 module.exports = router;

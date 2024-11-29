@@ -2,15 +2,42 @@
 const { Training } = require('../models/Training');
 
 const TrainingController = {
+    // createTraining: (req, res) => {
+    //     const training = req.body;
+    //     Training.create(training, (err) => {
+    //         if (err) {
+    //             return res.status(500).json({ error: 'Error creating training' });
+    //         }
+    //         res.status(201).json({ message: 'Training created successfully' });
+    //     });
+    // },
+
     createTraining: (req, res) => {
         const training = req.body;
+        
+        // Validate category_id if needed
+        if (!training.category_id) {
+          return res.status(400).json({ error: 'Category ID is required' });
+        }
+    
         Training.create(training, (err) => {
-            if (err) {
-                return res.status(500).json({ error: 'Error creating training' });
-            }
-            res.status(201).json({ message: 'Training created successfully' });
+          if (err) {
+            return res.status(500).json({ error: 'Error creating training', details: err.message });
+          }
+          res.status(201).json({ message: 'Training created successfully' });
         });
-    },
+      },
+
+      getTrainingsByCategory: (req, res) => {
+        const { categoryId } = req.params;
+        
+        Training.getByCategory(categoryId, (err, trainings) => {
+          if (err) {
+            return res.status(500).json({ error: 'Error fetching trainings', details: err.message });
+          }
+          res.status(200).json(trainings);
+        });
+      },
 
     getAllTrainings: (req, res) => {
         Training.getAll((err, trainings) => {
