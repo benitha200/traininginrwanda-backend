@@ -55,21 +55,6 @@ db.serialize(() => {
     FOREIGN KEY(training_schedule_id) REFERENCES training_schedules(id)
   )`);
 
-  // Trainings Table
-  // db.run(`CREATE TABLE IF NOT EXISTS trainings (
-  //   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  //   title TEXT,
-  //   description TEXT,
-  //   duration INTEGER,
-  //   instructor TEXT,
-  //   start_date DATE,
-  //   end_date DATE,
-  //   fee DECIMAL(10,2),
-  //   level TEXT,
-  //   is_certified BOOLEAN,
-  //   what_you_will_learn TEXT,
-  //   address TEXT
-  // )`);
 
   // Add category_id to the trainings table creation
   db.run(`CREATE TABLE IF NOT EXISTS trainings (
@@ -105,6 +90,18 @@ db.serialize(() => {
       capacity INTEGER,
       FOREIGN KEY(training_id) REFERENCES trainings(id)
     )`);
+
+  // In the database creation section
+  db.run(`CREATE TABLE IF NOT EXISTS reviews (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    training_id INTEGER,
+    user_email TEXT,
+    user_phone TEXT,
+    stars INTEGER CHECK(stars >= 1 AND stars <= 5),
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(training_id) REFERENCES trainings(id)
+  )`);
 });
 
 const app = express();
@@ -121,12 +118,14 @@ const trainingRoutes = require('./routes/trainingRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const trainingScheduleRoutes = require('./routes/trainingScheduleRoutes');
 const enrollmentRoutes = require('./routes/enrollmentRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/training-schedules', trainingScheduleRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
