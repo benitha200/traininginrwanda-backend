@@ -1,46 +1,51 @@
 const jwt = require('jsonwebtoken');
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
 
-const SECRET_KEY = process.env.JWT_SECRET || 'your_jwt_secret_key';
+exports.protect = async (req, res, next) => {
+  let token;
+  
+  // Check if token exists in headers
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
 
-exports.protect = (req, res, next) => {
-  // Get token from header
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-
-  // Check if no token
   if (!token) {
-    return res.status(401).json({ error: 'No token, authorization denied' });
+    return res.status(401).json({ message: 'Not authorized, no token' });
   }
 
   try {
     // Verify token
-    const decoded = jwt.verify(token, SECRET_KEY);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Add user from payload
-    req.user = decoded;
+    // Find user
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, email: true, role: true }
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: 'User not found' });
+    }
+
+    // Attach user to request
+    req.user = user;
     next();
-  } catch (err) {
-    res.status(401).json({ error: 'Token is not valid' });
+  } catch (error) {
+    res.status(401).json({ 
+      message: 'Not authorized, token failed',
+      error: error.message 
+    });
   }
 };
 
-// Role-based access control
 exports.restrictTo = (...roles) => {
   return (req, res, next) => {
-    // Check if user exists (from protect middleware)
-    if (!req.user) {
-      return res.status(401).json({ error: 'Please log in first' });
-    }
-
-    // Check if user's role is in the allowed roles
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({ 
-        error: 'You do not have permission to perform this action',
-        requiredRoles: roles,
-        yourRole: req.user.role
+        message: 'You do not have permission to perform this action' 
       });
     }
-
-    // If role is allowed, proceed to next middleware
     next();
   };
 };

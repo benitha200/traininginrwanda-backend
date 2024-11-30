@@ -2,13 +2,14 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const {
-  validateRegistration,
   register,
   login,
   forgotPassword,
   resetPassword,
   changePassword,
-  getAllUsers
+  getAllUsers,
+  getUserProfile,
+  updateUserProfile
 } = require('../controllers/authController');
 
 // Public Routes (no authentication required)
@@ -18,9 +19,11 @@ router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
 
 // Protected Routes (authentication required)
-router.use(authMiddleware.protect); // Apply authentication middleware to all routes below
+router.use(authMiddleware.protect);
 
 // User routes
+router.get('/profile', getUserProfile);
+router.patch('/profile', updateUserProfile);
 router.patch('/change-password', changePassword);
 
 // Admin-only routes
