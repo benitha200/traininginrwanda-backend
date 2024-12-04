@@ -85,12 +85,17 @@ const TrainingController = {
   createTraining: async (req, res) => {
     try {
       const training = req.body;
-
+  
       // Validate category_id if needed
       if (!training.category_id) {
         return res.status(400).json({ error: 'Category ID is required' });
       }
-
+  
+      // Ensure fee is a string that can be converted to a number
+      if (training.fee) {
+        training.fee = training.fee.toString().replace(/[^0-9.-]+/g,"");
+      }
+  
       const createdTraining = await Training.create(training);
       res.status(201).json({
         message: 'Training created successfully',

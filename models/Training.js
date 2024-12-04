@@ -349,13 +349,21 @@ const Training = {
     try {
       return await prisma.training.create({
         data: {
-          ...training,
-          what_you_will_learn: training.what_you_will_learn
-            ? JSON.stringify(training.what_you_will_learn)
-            : undefined,
+          title: training.title,
+          description: training.description,
+          duration: training.duration,
+          instructor: training.instructor,
+          fee: training.fee ? BigInt(training.fee) : null, // Convert fee to BigInt
+          level: training.level,
+          is_certified: training.is_certified,
+          what_you_will_learn: JSON.stringify(training.what_you_will_learn),
+          address: training.address,
           category: {
-            connect: { id: training.category_id }, // Link to the category
+            connect: { id: training.category_id }, // Use `connect` for category
           },
+          // Optionally add these if they might be present
+          start_date: training.start_date ? new Date(training.start_date) : null,
+          end_date: training.end_date ? new Date(training.end_date) : null,
         },
       });
     } catch (error) {
