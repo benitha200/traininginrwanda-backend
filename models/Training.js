@@ -343,6 +343,7 @@
 // module.exports = { Training };
 
 const prisma = require('./../prisma/prismaClient');
+const Decimal = require('decimal.js');
 
 const Training = {
   create: async (training) => {
