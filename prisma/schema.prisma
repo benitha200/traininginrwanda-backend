@@ -29,7 +29,7 @@ model Category {
 model Training {
   id                 Int                @id @default(autoincrement())
   title              String
-  description        String?
+  description        String?            @db.Text
   duration           Int?
   instructor         String?
   start_date         DateTime?
