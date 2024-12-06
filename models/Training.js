@@ -351,17 +351,16 @@ const Training = {
         data: {
           title: training.title,
           description: training.description,
-          duration: training.duration,
+          duration: training.duration ? Number(training.duration) : null,
           instructor: training.instructor,
-          fee: training.fee ? BigInt(training.fee) : null, // Convert fee to BigInt
+          fee: training.fee ? new Decimal(training.fee).toDecimalPlaces(2).toString() : null,
           level: training.level,
           is_certified: training.is_certified,
           what_you_will_learn: JSON.stringify(training.what_you_will_learn),
           address: training.address,
-          category: {
-            connect: { id: training.category_id }, // Use `connect` for category
-          },
-          // Optionally add these if they might be present
+          category: training.category_id ? {
+            connect: { id: training.category_id }
+          } : undefined,
           start_date: training.start_date ? new Date(training.start_date) : null,
           end_date: training.end_date ? new Date(training.end_date) : null,
         },
@@ -371,7 +370,6 @@ const Training = {
       throw error;
     }
   },
-
   getAll: async () => {
     try {
       const trainings = await prisma.training.findMany({
