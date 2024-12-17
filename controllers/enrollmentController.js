@@ -111,7 +111,7 @@ async function generateAcceptanceLetter(enrollment) {
         )
         .moveDown()
         .text(
-          'The participation fee for this training would be 500 RWF. Payment should be made to bank account before the course begins (more details are in the attached invoice).',
+          'The participation fee for this training would be 500 $. Payment should be made to bank account before the course begins (more details are in the attached invoice).',
           { align: 'left', lineGap: 5 }
         )
         .moveDown()
@@ -238,8 +238,8 @@ async function generateInvoice(enrollment) {
       doc
         .text('1', 50, tableContentTop)
         .text(enrollment.training_title, 100, tableContentTop, { width: 240 })
-        .text('500.00 RWF', 350, tableContentTop, { width: 90, align: 'right' })
-        .text('500.00 RWF', 450, tableContentTop, { width: 90, align: 'right' });
+        .text('500.00 $', 350, tableContentTop, { width: 90, align: 'right' })
+        .text('500.00 $', 450, tableContentTop, { width: 90, align: 'right' });
 
       // Calculate totals
       const subtotal = 500.00;

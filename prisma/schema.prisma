@@ -35,12 +35,14 @@ model Training {
   start_date         DateTime?
   end_date           DateTime?
   fee                Decimal?           @db.Decimal(10, 2)
+  original_fee       Decimal?           @db.Decimal(10, 2)
+  discount_percentage Int?
   level              String?
   is_certified       Boolean?
   what_you_will_learn Json?
   address            String?
   category_id        Int?
-  category           Category?           @relation(fields: [category_id], references: [id])
+  category           Category?          @relation(fields: [category_id], references: [id])
   training_schedules TrainingSchedule[]
   reviews            Review[]
 }
