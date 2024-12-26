@@ -35,60 +35,216 @@ transporter.verify(function(error, success) {
   }
 });
 
+// async function generateAcceptanceLetter(enrollment) {
+//   return new Promise((resolve, reject) => {
+//     try {
+//       console.log('Generating acceptance letter for:', enrollment.fullname);
+
+//       const doc = new PDFDocument({
+//         margins: { top: 100, bottom: 50, left: 50, right: 50 } // Increase the top margin
+//       });
+//       const pdfPath = path.join(pdfDirectory, `acceptance_${enrollment.id}_${Date.now()}.pdf`);
+//       const writeStream = fs.createWriteStream(pdfPath);
+
+//       // Generate reference number for KICDDA
+//       const refNumber = `TIR-${Date.now().toString().slice(-4)}-${enrollment.id}`;
+
+//       // Pipe the PDF document to the write stream
+//       doc.pipe(writeStream);
+
+//       // Left side header information
+//       doc
+//         .fontSize(11)
+//         .text(`Ref: ${refNumber}`)
+//         .moveDown()
+//         .text(enrollment.fullname)
+//         .text(enrollment.organization || '')
+//         .text(`Tel: ${enrollment.phone || 'N/A'}`)
+//         .text(`Email: ${enrollment.email}`)
+//         .text(`Country: ${enrollment.country || 'Rwanda'}`)
+//         .moveDown(2);
+
+//       // Right side header information
+//       const rightColumnX = 400;
+//       doc
+//         .text('info@trainingsinkigali.com', rightColumnX, 100, { align: 'right' })
+//         .text('www.trainingsinkigali.com', rightColumnX, 115, { align: 'right' })
+//         .text(new Date().toLocaleDateString('en-US', {
+//           month: 'long',
+//           day: 'numeric',
+//           year: 'numeric'
+//         }), rightColumnX, 130, { align: 'right' });
+
+//       // RE: ACCEPTANCE LETTER - Now aligned with the left margin
+//       doc
+//         .moveDown(7)
+//         .fontSize(11)
+//         .text('RE: ACCEPTANCE LETTER', 50, doc.y, { underline: true }); // Set x-coordinate to 50 to match left margin
+
+//       // Main content
+//       doc
+//         .moveDown(2)
+//         .text(
+//           `We are delighted to inform you that your request to participate in a ${
+//             enrollment.duration || 'two weeks (10 days)'
+//           } training workshop on ${
+//             enrollment.training_title
+//           } to be held from ${
+//             new Date(enrollment.start_date).toLocaleDateString('en-US', {
+//               month: 'long',
+//               day: 'numeric',
+//               year: 'numeric'
+//             })
+//           } – ${
+//             new Date(enrollment.end_date).toLocaleDateString('en-US', {
+//               month: 'long',
+//               day: 'numeric',
+//               year: 'numeric'
+//             })
+//           } in Kigali, Rwanda has been accepted. The training will take place in Kigali, Rwanda.`,
+//           { align: 'left', lineGap: 5 }
+//         )
+//         .moveDown()
+//         .text(
+//           'This training as well as all facilitation and materials will be offered in English language.',
+//           { align: 'left', lineGap: 5 }
+//         )
+//         .moveDown()
+//         .text(
+//           'The participation fee for this training would be 500 $. Payment should be made to bank account before the course begins (more details are in the attached invoice).',
+//           { align: 'left', lineGap: 5 }
+//         )
+//         .moveDown()
+//         .text(
+//           'For any enquiry regarding this training course, do not hesitate to contact us through our email: info@traininginrwanda.com.',
+//           { align: 'left', lineGap: 5 }
+//         )
+//         .moveDown()
+//         .text(
+//           'We look forward to serving you and enabling you to bring a positive change in your organization in the near future.',
+//           { align: 'left', lineGap: 5 }
+//         )
+//         .moveDown(2)
+//         .text('Yours sincerely,')
+//         .moveDown()
+//         .text('Training In Rwanda')
+//         .text('T: +250 785 283 918')
+//         .text('E: info@traininginrwanda.com')
+//         .text('W: www.traininginrwanda.com')
+//         .moveDown(2);
+
+//       // Footer
+//       doc
+//         .fontSize(8)
+//         .text('We DEVELOP and DELIVER trainings that satisfy our clients', { align: 'center' })
+//         .text('info@traininginrwanda.com; www.traininginrwanda.com; +250 785 283 918', { align: 'center' });
+
+//       // Handle stream completion
+//       writeStream.on('finish', () => {
+//         console.log('Acceptance letter generated successfully:', pdfPath);
+//         resolve(pdfPath);
+//       }); 
+//       writeStream.on('error', (error) => {
+//         console.error('Error writing acceptance letter:', error);
+//         reject(error);
+//       });
+
+//       doc.end();
+//     } catch (error) {
+//       console.error('Error in generateAcceptanceLetter:', error);
+//       reject(error);
+//     }
+//   });
+// }
+
 async function generateAcceptanceLetter(enrollment) {
   return new Promise((resolve, reject) => {
     try {
       console.log('Generating acceptance letter for:', enrollment.fullname);
 
       const doc = new PDFDocument({
-        margins: { top: 100, bottom: 50, left: 50, right: 50 } // Increase the top margin
+        margins: { top: 50, bottom: 50, left: 50, right: 50 }
       });
       const pdfPath = path.join(pdfDirectory, `acceptance_${enrollment.id}_${Date.now()}.pdf`);
       const writeStream = fs.createWriteStream(pdfPath);
 
-      // Generate reference number for KICDDA
+      // Generate reference number
       const refNumber = `TIR-${Date.now().toString().slice(-4)}-${enrollment.id}`;
 
-      // Pipe the PDF document to the write stream
       doc.pipe(writeStream);
 
-      // Left side header information
+      // Calculate page dimensions for centering
+      const pageWidth = doc.page.width - doc.page.margins.left - doc.page.margins.right;
+      const pageCenter = doc.page.margins.left + (pageWidth / 2);
+
+      try {
+        // Add logo
+        const logoPath = '/Users/benithalouange/Documents/TRAININGINRWANDA/traininginrwanda-backend/assets/images/header-logo.png';
+        if (fs.existsSync(logoPath)) {
+          doc.image(logoPath, pageCenter - 75, doc.page.margins.top, {
+            fit: [150, 100],
+            align: 'left'
+          });
+          doc.moveDown(4); // Add space after logo
+        } else {
+          console.error('Logo file not found at:', logoPath);
+        }
+      } catch (imageError) {
+        console.error('Error loading logo:', imageError);
+      }
+
+      // Add header logo and company name
       doc
         .fontSize(11)
-        .text(`Ref: ${refNumber}`)
-        .moveDown()
-        .text(enrollment.fullname)
-        .text(enrollment.organization || '')
-        .text(`Tel: ${enrollment.phone || 'N/A'}`)
-        .text(`Email: ${enrollment.email}`)
-        .text(`Country: ${enrollment.country || 'Rwanda'}`)
+        .font('Helvetica')
+        .text('Kigali Capacity Development & Leadership Center', { align: 'left' })
+        .moveDown(0.5);
+
+      // Contact information
+      doc
+        .fontSize(11)
+        .font('Helvetica')
+        .text('+250788444939', { align: 'center' })
+        .text('info@traininginrwanda.com', { align: 'center' })
         .moveDown(2);
 
-      // Right side header information
-      const rightColumnX = 400;
+      // Date
       doc
-        .text('info@trainingsinkigali.com', rightColumnX, 100, { align: 'right' })
-        .text('www.trainingsinkigali.com', rightColumnX, 115, { align: 'right' })
         .text(new Date().toLocaleDateString('en-US', {
-          month: 'long',
           day: 'numeric',
+          month: 'long',
           year: 'numeric'
-        }), rightColumnX, 130, { align: 'right' });
+        }))
+        .moveDown(2);
 
-      // RE: ACCEPTANCE LETTER - Now aligned with the left margin
+      // Recipient information
       doc
-        .moveDown(7)
-        .fontSize(11)
-        .text('RE: ACCEPTANCE LETTER', 50, doc.y, { underline: true }); // Set x-coordinate to 50 to match left margin
+        .font('Helvetica-Bold')
+        .text(enrollment.fullname)
+        .font('Helvetica')
+        .text(enrollment.email)
+        .text(enrollment.phone)
+        .text(enrollment.address)
+        // .text(`${enrollment.country || 'Anytown'}, ${enrollment.city || 'ST 12345'}`)
+        .moveDown(2);
+
+      // Reference number
+      doc
+        .text(`Ref: ${refNumber}`)
+        .moveDown(2);
+
+      // Salutation
+      doc
+        .text(`Dear ${enrollment.fullname},`)
+        .moveDown();
 
       // Main content
       doc
-        .moveDown(2)
         .text(
-          `We are delighted to inform you that your request to participate in a ${
-            enrollment.duration || 'two weeks (10 days)'
-          } training workshop on ${
-            enrollment.training_title
+          `We are delighted to inform you that your request to participate in a 
+          
+          training workshop on ${
+            enrollment.training_schedule.training.title
           } to be held from ${
             new Date(enrollment.start_date).toLocaleDateString('en-US', {
               month: 'long',
@@ -101,45 +257,42 @@ async function generateAcceptanceLetter(enrollment) {
               day: 'numeric',
               year: 'numeric'
             })
-          } in Kigali, Rwanda has been accepted. The training will take place in Kigali, Rwanda.`,
-          { align: 'left', lineGap: 5 }
+          } in Kigali, Rwanda has been accepted.`,
+          { align: 'justify', lineGap: 8 }
         )
         .moveDown()
         .text(
-          'This training as well as all facilitation and materials will be offered in English language.',
-          { align: 'left', lineGap: 5 }
+          `The training will be conducted in English language, including all facilitation and materials.`,
+          { align: 'justify', lineGap: 8 }
         )
         .moveDown()
         .text(
-          'The participation fee for this training would be 500 $. Payment should be made to bank account before the course begins (more details are in the attached invoice).',
-          { align: 'left', lineGap: 5 }
+          `The participation fee for this training is ${enrollment.training_schedule.training.fee} USD. Payment should be made to the bank account before the course begins (please refer to the attached invoice for payment details).`,
+          { align: 'justify', lineGap: 8 }
         )
         .moveDown()
         .text(
-          'For any enquiry regarding this training course, do not hesitate to contact us through our email: info@traininginrwanda.com.',
-          { align: 'left', lineGap: 5 }
+          'For any inquiries regarding this training course, please contact us at info@traininginrwanda.com.',
+          { align: 'justify', lineGap: 8 }
         )
-        .moveDown()
-        .text(
-          'We look forward to serving you and enabling you to bring a positive change in your organization in the near future.',
-          { align: 'left', lineGap: 5 }
-        )
-        .moveDown(2)
-        .text('Yours sincerely,')
-        .moveDown()
-        .text('Training In Rwanda')
-        .text('T: +250 785 283 918')
-        .text('E: info@traininginrwanda.com')
-        .text('W: www.traininginrwanda.com')
         .moveDown(2);
 
+      // Closing
+      doc
+        .text('Sincerely,')
+        .moveDown(2)
+        .font('Helvetica-Bold')
+        .text('Training Coordinator')
+        .font('Helvetica')
+        .text('Kigali Capacity Development & Leadership Center');
+
       // Footer
+      const footerY = doc.page.height - 50;
       doc
         .fontSize(8)
-        .text('We DEVELOP and DELIVER trainings that satisfy our clients', { align: 'center' })
-        .text('info@traininginrwanda.com; www.traininginrwanda.com; +250 785 283 918', { align: 'center' });
+        .text('Kigali Capacity Development & Leadership Center', 50, footerY, { align: 'center' })
+        .text('Leading Excellence in Professional Development', { align: 'center' });
 
-      // Handle stream completion
       writeStream.on('finish', () => {
         console.log('Acceptance letter generated successfully:', pdfPath);
         resolve(pdfPath);

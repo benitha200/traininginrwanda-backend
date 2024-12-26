@@ -164,7 +164,7 @@ app.use('/api/training-schedules', trainingScheduleRoutes);
 app.use('/api/enrollments', enrollmentRoutes);
 app.use('/api/reviews', reviewRoutes);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5005;
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
